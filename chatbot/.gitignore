@@ -1,0 +1,16 @@
+# Environment
+.env
+*.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Databases
+*.db
+
+# Uploaded files
+uploads/
+
+# Virtual environment
+.venv/
