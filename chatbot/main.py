@@ -1,17 +1,38 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from openai import OpenAI
-import os
 from dotenv import load_dotenv
+import os
+from typing import List, Dict, Any
 
+
+# ----- Config & Client Setup -----
 load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-app = FastAPI()
-client = OpenAI(api_key=api_key)
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    # Fail fast if key is missing
+    raise RuntimeError(
+        "OPENAI_API_KEY is not set. "
+        "Check your .env file or environment variables."
+    )
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+app = FastAPI(
+    title="AI Chat & Resume Grader",
+    version="0.1.0",
+    description="Simple FastAPI backend for chat and resume-job matching",
+)
 
 
+# ----- Pydantic Models -----
 class ChatRequest(BaseModel):
     message: str
+
+
+class ChatResponse(BaseModel):
+    reply: str
 
 
 class MatchRequest(BaseModel):
@@ -19,67 +40,108 @@ class MatchRequest(BaseModel):
     resume_text: str       # PDF already converted to plain text
 
 
-def get_bot_reply(user_message):
-    user_message = user_message.lower()
-    if "hello" in user_message or "hi" in user_message:
+class GradeResponse(BaseModel):
+    evaluation: str
+
+
+# ----- Helper: generic OpenAI call -----
+def call_chat_model(
+    messages: List[Dict[str, Any]],
+    model: str = "gpt-4.1-mini",
+    temperature: float = 0.2,
+) -> str:
+    """
+    Small wrapper to call OpenAI Chat Completions and handle errors consistently.
+    """
+    try:
+        completion = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+        )
+    except Exception as e:
+        # Bubble this up as an HTTP error so FastAPI returns 500
+        raise HTTPException(status_code=500, detail=f"OpenAI error: {str(e)}")
+
+    msg = completion.choices[0].message.content
+    if msg is None:
+        raise HTTPException(
+            status_code=500,
+            detail="OpenAI returned an empty response."
+        )
+    return msg
+
+
+# ----- Chatbot Logic -----
+def get_bot_reply(user_message: str) -> str:
+    # Keep original case, just use a quick check for greetings
+    lower_msg = user_message.lower()
+
+    if any(greeting in lower_msg for greeting in ["hello", "hi", "hey"]):
         return "Hello! How can I assist you today?"
-    else:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "user", "content": "act as a top level advisor and anser the flooing qution " + user_message}]
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            return f"Error: {str(e)}"
+
+    # Use the model for anything else
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a top-level advisor. "
+                "Give clear, helpful, and concise answers."
+            ),
+        },
+        {
+            "role": "user",
+            "content": user_message,
+        },
+    ]
+    return call_chat_model(messages)
 
 
-@app.post("/chat/")
-def chat(request: ChatRequest):
-    reply = get_bot_reply(request.message)
-    return ({"reply": reply})
+# ----- Resume Grading Logic -----
+RESUME_SYSTEM_PROMPT = """
+You are an expert recruiter and resume reviewer.
+
+Given a job description and a candidate resume, evaluate how well the resume matches the job.
+
+Your response MUST include:
+- A match score from 0 to 100 (label it clearly, e.g. "Match Score: 82/100")
+- 3–5 bullet points on key strengths
+- 3–5 bullet points on gaps or missing skills
+- Concrete suggestions to improve the resume for this specific job
+"""
 
 
 def grade_resume_against_job(job_description: str, resume_text: str) -> str:
-    """
-    Uses OpenAI to evaluate how well the resume matches the job description.
-    Returns a human-readable string with a score + feedback.
-    """
-    try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are an expert recruiter and resume reviewer. "
-                        "Given a job description and a candidate resume, "
-                        "evaluate how well the resume matches the job.\n\n"
-                        "Your response MUST include:\n"
-                        "- A match score from 0 to 100 (label it clearly)\n"
-                        "- 3–5 bullet points on key strengths\n"
-                        "- 3–5 bullet points on gaps or missing skills\n"
-                        "- Concrete suggestions to improve the resume for this specific job"
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        f"JOB DESCRIPTION:\n{job_description}\n\n"
-                        f"RESUME:\n{resume_text}"
-                    ),
-                },
-            ],
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        # In an API it's better to raise an HTTP error instead of returning an error string
-        raise HTTPException(status_code=500, detail=f"OpenAI error: {str(e)}")
+    messages = [
+        {
+            "role": "system",
+            "content": RESUME_SYSTEM_PROMPT.strip(),
+        },
+        {
+            "role": "user",
+            "content": (
+                f"JOB DESCRIPTION:\n{job_description}\n\n"
+                f"RESUME:\n{resume_text}"
+            ),
+        },
+    ]
+    return call_chat_model(messages)
 
 
-@app.post("/grade_resume/")
-def grade_resume(request: MatchRequest):
+# ----- FastAPI Routes -----
+@app.post("/chat/", response_model=ChatResponse)
+async def chat(request: ChatRequest) -> ChatResponse:
+    """
+    Simple chat endpoint:
+    Input: {"message": "..."}
+    Output: {"reply": "..."}
+    """
+    reply = get_bot_reply(request.message)
+    return ChatResponse(reply=reply)
+
+
+@app.post("/grade_resume/", response_model=GradeResponse)
+async def grade_resume(request: MatchRequest) -> GradeResponse:
     """
     Expects JSON like:
     {
@@ -91,4 +153,4 @@ def grade_resume(request: MatchRequest):
         job_description=request.job_description,
         resume_text=request.resume_text,
     )
-    return {"evaluation": evaluation}
+    return GradeResponse(evaluation=evaluation)
