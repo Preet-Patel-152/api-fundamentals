@@ -1,3 +1,4 @@
+import json
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from openai import OpenAI
@@ -86,19 +87,23 @@ def chat(request: ChatRequest):
 # ---------------------------
 # Resume Grading Logic
 # ---------------------------
-def grade_resume_against_job(job_description: str, resume_text: str) -> str:
+
+
+def grade_resume_against_job(job_description: str, resume_text: str) -> dict:
     messages = [
         {
             "role": "system",
             "content": (
-                "You are an expert recruiter and resume reviewer. "
-                "Given a job description and a candidate resume, "
-                "evaluate how well the resume matches the job.\n\n"
-                "Your response MUST include:\n"
-                "- A match score from 0 to 100\n"
-                "- 3–5 bullet points on key strengths\n"
-                "- 3–5 bullet points on weaknesses/missing skills\n"
-                "- Concrete resume improvement suggestions"
+                "You are an expert recruiter and resume reviewer.\n"
+                "Given a job description and a resume, evaluate how well they match.\n"
+                "Respond ONLY in valid JSON with this exact schema:\n\n"
+                "{\n"
+                '  "match_score": number,            // 0-100\n'
+                '  "summary": string,               // short summary\n'
+                '  "strengths": [string, ...],      // 3-5 bullet points\n'
+                '  "gaps": [string, ...],           // 3-5 bullet points\n'
+                '  "improvements": [string, ...]    // concrete suggestions\n'
+                "}\n"
             ),
         },
         {
@@ -110,7 +115,18 @@ def grade_resume_against_job(job_description: str, resume_text: str) -> str:
         },
     ]
 
-    return call_chat_model(messages)
+    raw = call_chat_model(messages)
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        # fallback if model returns something slightly off
+        raise HTTPException(
+            status_code=500,
+            detail="Model returned invalid JSON. Try again or adjust the prompt."
+        )
+
+    return data
 
 
 @app.post("/grade_resume/")
