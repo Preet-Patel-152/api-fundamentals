@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Preet Patel - Resume</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Resume website for Preet Patel, aspiring software engineer." />
+    <style>
+        /* Basic reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #222;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 24px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        header {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            letter-spacing: 0.03em;
+        }
+
+        header p {
+            margin-top: 4px;
+            color: #555;
+        }
+
+        .contact {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .contact a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .contact a:hover {
+            text-decoration: underline;
+        }
+
+        h2.section-title {
+            margin: 24px 0 8px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #444;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        .tagline {
+            margin-top: 10px;
+            font-size: 0.98rem;
+        }
+
+        .item {
+            margin-bottom: 12px;
+        }
+
+        .item-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .item-title {
+            font-weight: 600;
+        }
+
+        .item-subtitle {
+            font-style: italic;
+            color: #555;
+        }
+
+        .item-date {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        ul {
+            margin-left: 18px;
+            margin-top: 4px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        .pill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .pill {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background-color: #f0f0f0;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 600px) {
+            .container {
+                margin: 16px;
+                padding: 16px;
+            }
+
+            header h1 {
+                font-size: 1.6rem;
+            }
+
+            .item-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <h1>Preet Patel</h1>
+            <p>Aspiring Software Engineer • Python & Web Development</p>
+
+            <div class="contact">
+                <span>Chicago, IL · </span>
+                <a href="mailto:youremail@example.com">youremail@example.com</a> ·
+                <a href="tel:+11234567890">(+1) 123-456-7890</a> ·
+                <a href="https://www.linkedin.com/in/your-link" target="_blank">LinkedIn</a> ·
+                <a href="https://github.com/your-github" target="_blank">GitHub</a>
+            </div>
+
+            <p class="tagline">
+                Computer Science graduate with a focus on Python, backend systems, and building real-world projects.
+                Passionate about shipping clean code, learning fast, and solving practical problems with software.
+            </p>
+        </header>
+
+        <!-- Summary -->
+        <section class="section">
+            <h2 class="section-title">Summary</h2>
+            <p>
+                Detail-oriented developer with experience in Python, basic web development (HTML/CSS), and
+                building CLI applications and APIs. Comfortable working with Git/GitHub, debugging issues,
+                and learning new tools quickly. Open to backend, full-stack, and software engineering internships.
+            </p>
+        </section>
+
+        <!-- Skills -->
+        <section class="section">
+            <h2 class="section-title">Skills</h2>
+
+            <div class="item">
+                <div class="item-title">Languages</div>
+                <div class="pill-list">
+                    <span class="pill">Python</span>
+                    <span class="pill">Java</span>
+                    <span class="pill">HTML</span>
+                    <span class="pill">CSS</span>
+                    <span class="pill">SQL (basic)</span>
+                </div>
+            </div>
+
+            <div class="item">
+                <div class="item-title">Tools & Technologies</div>
+                <div class="pill-list">
+                    <span class="pill">Git & GitHub</span>
+                    <span class="pill">VS Code</span>
+                    <span class="pill">FastAPI (learning)</span>
+                    <span class="pill">REST APIs</span>
+                    <span class="pill">JSON</span>
+                </div>
+            </div>
+
+            <div class="item">
+                <div class="item-title">Other</div>
+                <div class="pill-list">
+                    <span class="pill">Problem Solving</span>
+                    <span class="pill">OOP</span>
+                    <span class="pill">Command Line</span>
+                    <span class="pill">Team Collaboration</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects -->
+        <section class="section">
+            <h2 class="section-title">Projects</h2>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">Secure Bank Management System (CLI)</div>
+                        <div class="item-subtitle">Python · Personal Project</div>
+                    </div>
+                    <div class="item-date">2025</div>
+                </div>
+                <ul>
+                    <li>Built an object-oriented bank account simulator with account creation, login, deposit,
+                        withdrawal, and transaction history.</li>
+                    <li>Implemented defensive programming with input validation and error handling to prevent crashes
+                        from invalid user input.</li>
+                    <li>Used JSON file storage to persist account data across sessions (name, password, balance, and
+                        history).</li>
+                </ul>
+            </div>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">AI Resume Evaluator (WIP)</div>
+                        <div class="item-subtitle">Python · FastAPI · OpenAI</div>
+                    </div>
+                    <div class="item-date">2025</div>
+                </div>
+                <ul>
+                    <li>Designing an API that analyzes resumes against job descriptions and returns scores plus
+                        feedback.</li>
+                    <li>Using FastAPI to build clean endpoints and integrating an AI model for text analysis.</li>
+                    <li>Planning hybrid scoring that combines rule-based checks (keywords, structure) with AI feedback.
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Experience -->
+        <section class="section">
+            <h2 class="section-title">Experience</h2>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">[Job Title]</div>
+                        <div class="item-subtitle">[Company Name] · [Location]</div>
+                    </div>
+                    <div class="item-date">[Start Date] – [End Date]</div>
+                </div>
+                <ul>
+                    <li>Short bullet about what you did and what impact you had.</li>
+                    <li>Short bullet about tools/technologies you used.</li>
+                    <li>Short bullet with a concrete result (numbers if possible).</li>
+                </ul>
+            </div>
+
+            <!-- Duplicate and edit this block for more roles -->
+        </section>
+
+        <!-- Education -->
+        <section class="section">
+            <h2 class="section-title">Education</h2>
+
+            <div class="item">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">BSc (Honours) in Computer Science</div>
+                        <div class="item-subtitle">York University · Toronto, ON</div>
+                    </div>
+                    <div class="item-date">[Graduation Year]</div>
+                </div>
+                <ul>
+                    <li>Relevant coursework: Data Structures, Algorithms, Networks, Operating Systems, Web Development.
+                    </li>
+                    <li>Projects include CLI apps, small web apps, and networking assignments.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <section class="section">
+            <p style="font-size: 0.8rem; color: #777; margin-top: 16px;">
+                References available upon request.
+            </p>
+        </section>
+    </main>
+</body>
+
+</html>
