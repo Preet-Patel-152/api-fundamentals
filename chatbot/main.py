@@ -7,6 +7,7 @@ from pypdf import PdfReader
 from pathlib import Path
 from io import BytesIO
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 # Load env
 env_path = Path(__file__).resolve().parent / ".env"
@@ -18,6 +19,19 @@ if not api_key:
     raise RuntimeError("OPENAI_API_KEY not set in .env")
 
 client = OpenAI(api_key=api_key)
+
+# Enable CORS for all origins (for development)
+app = FastAPI(
+    title="Resume AI Service",
+    description="Chat + Resume Grading + PDF Upload"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, set this to your frontend's URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app = FastAPI(
     title="Resume AI Service",

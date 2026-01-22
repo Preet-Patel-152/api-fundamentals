@@ -259,7 +259,6 @@
         });
 
         form.addEventListener("submit", async (e) => {
-            // If you already handle submission elsewhere, remove this block.
             e.preventDefault();
 
             // Basic validation UI
@@ -281,15 +280,56 @@
             status.textContent = "Working…";
             status.className = "status";
 
-            // Demo placeholder (replace with your API call)
-            await new Promise((r) => setTimeout(r, 700));
-            resultBox.textContent =
-                "✅ Example output:\n- Match score: 78%\n- Missing keywords: AWS, Docker\n- Suggestions: Add metrics to experience bullets.";
+            // Prepare form data
+            const formData = new FormData();
+            formData.append("resume_pdf", resume.files[0]);
+            formData.append("job_description", jobText);
 
-            status.textContent = "Done.";
-            status.className = "status success";
-            btn.disabled = false;
-            btn.textContent = "Analyze Resume";
+            try {
+                const response = await fetch("http://localhost:8000/grade_resume_pdf/", {
+                    method: "POST",
+                    body: formData
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "API error");
+                }
+                const data = await response.json();
+                const evalResult = data.evaluation;
+                // Format the result for display
+                let resultText = "";
+
+                resultText += `Match Score: ${evalResult.match_score}%\n\n`;
+                resultText += `Summary:\n${evalResult.summary}\n\n`;
+
+                resultText += "Strengths:\n";
+                evalResult.strengths.forEach(s => {
+                    resultText += `• ${s}\n`;
+                });
+
+                resultText += "\nGaps:\n";
+                evalResult.gaps.forEach(g => {
+                    resultText += `• ${g}\n`;
+                });
+
+                resultText += "\nImprovements:\n";
+                evalResult.improvements.forEach(i => {
+                    resultText += `• ${i}\n`;
+                });
+
+                resultBox.textContent = resultText;
+
+                resultBox.textContent = resultText;
+                status.textContent = "Done.";
+                status.className = "status success";
+            } catch (err) {
+                resultBox.textContent = "";
+                status.textContent = "Error: " + err.message;
+                status.className = "status error";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Analyze Resume";
+            }
         });
     </script>
 </body>
