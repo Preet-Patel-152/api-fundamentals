@@ -23,21 +23,18 @@ client = OpenAI(api_key=api_key)
 # Enable CORS for all origins (for development)
 app = FastAPI(
     title="Resume AI Service",
+    version="1.0.0",
     description="Chat + Resume Grading + PDF Upload"
 )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, set this to your frontend's URL
+    allow_origins=["*"],  # dev only
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app = FastAPI(
-    title="Resume AI Service",
-    version="1.0.0",
-    description="Chat + Resume Grading + PDF Upload"
-)
 
 # ---------------------------
 # Pydantic Models
@@ -56,11 +53,12 @@ class MatchRequest(BaseModel):
 # ---------------------------
 # Helper: Call OpenAI
 # ---------------------------
-def call_chat_model(messages, model="gpt-4o-mini"):
+def call_chat_model(messages, model="gpt-4.1-mini"):
     try:
         completion = client.chat.completions.create(
             model=model,
-            messages=messages
+            messages=messages,
+            response_format={"type": "json_object"}
         )
         return completion.choices[0].message.content
     except Exception as e:
